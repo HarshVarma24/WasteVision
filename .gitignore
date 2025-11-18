@@ -1,0 +1,25 @@
+# Ignore Python virtual environments
+venv/
+backend/venv/
+backend/.venv/
+*/venv/
+*/.venv/
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Environment variables
+.env
+
+# VSCode
+.vscode/
+
+# Flutter
+build/
+.dart_tool/
+.packages
+pubspec.lock
+
+# Backup / logs
+*.log

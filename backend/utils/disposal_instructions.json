@@ -1,0 +1,12 @@
+{
+  "Metal": "Recycle in the metal bin. Clean before recycling.",
+  "Glass": "Recycle in the glass bin. Avoid sharp edges.",
+  "Biological": "Compost organic waste or dispose in the biodegradable bin.",
+  "Paper": "Recycle clean paper. Do not recycle wet or soiled paper.",
+  "Battery": "Hazardous waste! Do NOT throw in trash. Drop at e-waste collection centers.",
+  "Trash": "General waste. Cannot be recycled. Dispose in the trash bin.",
+  "Cardboard": "Flatten cardboard boxes and place in the recycling bin.",
+  "Shoes": "Donate wearable shoes. Otherwise, dispose in textile recycling bins.",
+  "Clothes": "Donate usable clothes. Otherwise recycle via textile recycling programs.",
+  "Plastic": "Recycle plastics labeled 1, 2, or 5. Avoid burning or landfilling."
+}
