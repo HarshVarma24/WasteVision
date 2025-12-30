@@ -1,0 +1,50 @@
+# Misc
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VSCode (optional)
+#.vscode/
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+.coverage/
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.metadata
+
+# Generated app symbols / maps
+app.*.symbols
+app.*.map.json
+
+# Platform build output
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Optional: ignore platform folders entirely
+android/
+ios/
+macos/
+windows/
+linux/
+web/
