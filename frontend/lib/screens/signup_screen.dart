@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
-import 'signup_screen.dart';
+import 'login_screen.dart';
 import '../services/api_services.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+class SignupScreen extends StatefulWidget {
+  const SignupScreen({Key? key}) : super(key: key);
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignupScreenState extends State<SignupScreen> {
+  final _name = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
   @override
   void dispose() {
-    // Clean up controllers when widget is disposed
+    _name.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -33,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               // Welcome Text
               const Text(
-                'Welcome Back!',
+                'Hello Folk!',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -69,6 +70,32 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 child: Column(
                   children: [
+                    // Name Field
+                    TextField(
+                      controller: _name,
+                      keyboardType: TextInputType.name,
+                      style: const TextStyle(fontFamily: 'Poppins'),
+                      decoration: InputDecoration(
+                        hintText: 'Enter your name',
+                        hintStyle: TextStyle(
+                          color: Colors.grey[400],
+                          fontFamily: 'Poppins',
+                        ),
+                        prefixIcon: Icon(
+                          Icons.person,
+                          color: Colors.green[600],
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15.0),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 16.0,
+                          horizontal: 20.0,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16.0),
+
                     // Email Field
                     TextField(
                       controller: _emailController,
@@ -106,7 +133,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           Icons.lock_outline,
                           color: Colors.green[600],
                         ),
-
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(15.0),
                         ),
@@ -118,18 +144,19 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 30.0),
 
-                    // Login Button
+                    // SignUp Button
                     SizedBox(
                       width: double.infinity,
                       height: 55,
                       child: ElevatedButton(
                         onPressed: () async {
-                          print("Login button pressed");
-                          try{
-                            final res = await ApiServices.login(
+                          try {
+                            final res = await ApiServices.signup(
+                              _name.text.trim(),
                               _emailController.text.trim(),
                               _passwordController.text.trim(),
                             );
+                            
                             if(res['error'] != null){
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(content: Text(res['error'])),
@@ -137,12 +164,16 @@ class _LoginScreenState extends State<LoginScreen> {
                               return;
                             }
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Login Successful! Welcome ${res['name']}')),
+                              SnackBar(
+                                content: Text(
+                                  'Sign Up Successful! Welcome ${res['name']}',
+                                ),
+                              ),
                             );
-                          } catch(e){
+                          } catch (e) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Network Error: $e')),
-                            );  
+                              SnackBar(content: Text('Network error: $e')),
+                            );
                           }
                         },
                         style: ElevatedButton.styleFrom(
@@ -157,7 +188,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: const [
                             Text(
-                              'Login',
+                              'Sign Up',
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -175,12 +206,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
 
-              // Register Link
+              // Login Link
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    "Don't have an account?",
+                    "Already have an account?",
                     style: TextStyle(
                       fontFamily: 'Poppins',
                       color: Colors.white,
@@ -189,15 +220,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   TextButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SignupScreen(),
-                        ),
-                      );
+                      Navigator.pop(context);
                     },
                     child: Text(
-                      'Register',
+                      'Login',
                       style: TextStyle(
                         color: Color(0xFF5C6BC0),
                         fontWeight: FontWeight.bold,
