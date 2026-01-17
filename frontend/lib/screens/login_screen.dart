@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'signup_screen.dart';
 import '../services/api_services.dart';
+import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -125,24 +126,28 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: ElevatedButton(
                         onPressed: () async {
                           print("Login button pressed");
-                          try{
+                          try {
                             final res = await ApiServices.login(
                               _emailController.text.trim(),
                               _passwordController.text.trim(),
                             );
-                            if(res['error'] != null){
+                            if (res['error'] != null) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(content: Text(res['error'])),
                               );
                               return;
                             }
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Login Successful! Welcome ${res['name']}')),
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    HomeScreen(name: res['name']),
+                              ),
                             );
-                          } catch(e){
+                          } catch (e) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text('Network Error: $e')),
-                            );  
+                            );
                           }
                         },
                         style: ElevatedButton.styleFrom(

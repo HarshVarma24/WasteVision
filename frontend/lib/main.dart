@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
 import 'auth/auth_checker.dart';
+import 'screens/home_screen.dart';
 
 void main() {
   runApp(const WasteVisionApp());
