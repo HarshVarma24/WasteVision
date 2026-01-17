@@ -1,58 +1,90 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, UploadFile, File, Depends
 from PIL import Image
 import numpy as np
 import tensorflow as tf
-import io # For handling byte streams means we can read image bytes directly
+import io
 import json
-from database import history_collection
+from tensorflow.keras.models import load_model
+import tensorflow
+from database.database import db, users_collection
+from models.user import UserLogin, UserSignup
+import jwt
+from auth.tokens import create_jwt, verify_token
+from fastapi.concurrency import run_in_threadpool
+
 
 app = FastAPI()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    allow_origins=["*"],
-)
+model = load_model("waste_classifier.keras", compile=False)
 
-model = tf.keras.model.loa_model("waste_classification_model.h5")
+Classes = ['battery',
+ 'biological',
+ 'cardboard',
+ 'clothes',
+ 'glass',
+ 'metal',
+ 'paper',
+ 'plastic',
+ 'shoes',
+ 'trash']
 
-Classes = [
-    "Metal","Glass","Biological","Paper",
-    "Battery","Trash","Cardboard","Shoes",
-    "Clothes","Plastic"
-    ]
-    
+# Load instructions JSON
 with open("utils/disposal_instructions.json", "r") as f:
     disposal_data = json.load(f)
+
+@app.post("/signup")
+async def signup(user: UserSignup):
+    existing_user = await users_collection.find_one({"email": user.email})
+    if existing_user:
+        return {"error": "User already exists"}
+        
+    user_dict = user.dict()
+    await users_collection.insert_one(user_dict)
     
+    return {"message": "User created successfully"}
+
+@app.post("/login")
+async def login(user: UserLogin):
+    # the below line opens database and checks if the value entered by user on login exists
+    # in our database. If it does, it returns the user data. Otherwise it returns None
+    existing_user = await users_collection.find_one({"email": user.email})
+    
+    # if user does not exist in our database, it will simply return this error message
+    if existing_user == None:
+        return {"error": "User does not exist"}
+    
+    # Checks if password is invalid, if it is, it returns this error message   
+    if existing_user["password"] != user.password:
+        return {"error": "Incorrect password"}
+    
+    # If both username and password are correct, it returns this message
+    return {"message": "Login successful", "token": create_jwt(user.email), "name": existing_user["name"]
+}
+
+@app.get("/testapi")
+async def test_api():
+    return {"message": "API is working"}
+
+@app.get("/verifylogin")
+def get_current_user(data: dict = Depends(verify_token)):
+    return {"message": f"Hello, {data['email']}! Your token is valid."}
+
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
-    content = await file.read() # Read the uploaded file
-    img = Image.open(io.BytesIO(content)).resize((224, 224)) # Resize image to model's expected input size
-    img_arr = np.array(img)/255.0 # Normalize the image in the range [0, 1]
-    img_arr = np.expand_dims(img_arr, axis=0) # Add batch dimension like (1, 224, 224, 3) i.e. height, width, channels
-    
-    predictions = model.predict(img_arr)
-    waste_type = Classes[np.argmax(predictions[0])]
-    confidence = float(np.max(predictions[0])) * 100
+    content = await file.read()
+
+    img = Image.open(io.BytesIO(content)).resize((128, 128))
+    img_arr = np.array(img) 
+    img_arr = np.expand_dims(img_arr, axis=0)
+    print(img_arr.shape)
+
+    predictions = await run_in_threadpool(model.predict, img_arr)
+
+    waste_type = Classes[np.argmax(predictions)]
+    confidence = float(np.max(predictions)) * 100
     instructions = disposal_data.get(waste_type, "No instructions available.")
-    
-    history_collection.insert_one({
+
+    return {
         "waste_type": waste_type,
         "confidence": confidence,
-        "instructions": instructions
-    })
-    
-    return{
-        "waste_type": waste_type,
-        "confidence": confidence,
-        "instructions": instructions
-    }
-    
-    @app.get("/history")
-    async def get_history():
-        history = list(history_collection.find({}, {"_id": 0}))
-        return history
+        }
